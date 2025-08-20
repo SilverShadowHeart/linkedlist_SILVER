@@ -1,130 +1,186 @@
 from .node import SLLNode
 
 class SingleLinkedList:
-    __slots__ = ['head', 'tail']
+    """A singly linked list with head and tail pointers."""
+    __slots__ = ['head', 'tail', 'size']
 
     def __init__(self):
+        """Initialize an empty singly linked list."""
         self.head = None
         self.tail = None
+        self.size = 0
+
+    def is_empty(self):
+        """Return True if the list is empty."""
+        return self.head is None
 
     def insert_at_beginning(self, data):
+        """Insert a node with the given data at the beginning.
+
+        Args:
+            data: The data to insert.
+        """
         new_node = SLLNode(data)
         if not self.head:
             self.head = self.tail = new_node
         else:
             new_node.next = self.head
             self.head = new_node
+        self.size += 1
 
     def insert_at_end(self, data):
+        """Insert a node with the given data at the end.
+
+        Args:
+            data: The data to insert.
+        """
         new_node = SLLNode(data)
         if not self.head:
             self.head = self.tail = new_node
         else:
             self.tail.next = new_node
             self.tail = new_node
+        self.size += 1
 
-    def insert_at_position(self, data, position):  # renamed from append
-        new_node = SLLNode(data)
-        if position <= 0 or not self.head:
-            new_node.next = self.head
-            self.head = new_node
-            if not self.tail:
-                self.tail = new_node
+    def insert_at_position(self, data, position):
+        """Insert a node with the given data at the specified 0-based position.
+
+        Args:
+            data: The data to insert.
+            position: The 0-based index where the node should be inserted.
+
+        Raises:
+            ValueError: If position is negative or beyond list length.
+        """
+        if position < 0 or position > self.size:
+            raise ValueError("Invalid position")
+        if position == 0:
+            self.insert_at_beginning(data)
+            return
+        if position == self.size:
+            self.insert_at_end(data)
             return
 
+        new_node = SLLNode(data)
         cur = self.head
-        idx = 1
-        while cur.next and idx < position - 1:
+        for _ in range(position - 1):
             cur = cur.next
-            idx += 1
-
         new_node.next = cur.next
         cur.next = new_node
+        self.size += 1
 
-        if new_node.next is None:  # update tail if inserted at end
-            self.tail = new_node
+    def delete(self, position):
+        """Delete the node at the specified 0-based position.
 
-    def delete(self, pos):  # delete at index (0-based)
+        Args:
+            position: The 0-based index of the node to delete.
+
+        Raises:
+            ValueError: If the list is empty or position is invalid.
+        """
         if not self.head:
-            print("empty list")
-            return
-        if pos == 0:
+            raise ValueError("Empty list")
+        if position < 0 or position >= self.size:
+            raise ValueError("Invalid position")
+        if position == 0:
             self.del_at_start()
+            return
+        if position == self.size - 1:
+            self.del_at_end()
             return
 
         cur = self.head
-        prev = None
-        idx = 0
-        while cur and idx < pos:
-            prev = cur
+        for _ in range(position - 1):
             cur = cur.next
-            idx += 1
-
-        if not cur:
-            print("invalid position")
-            return
-
-        prev.next = cur.next
-        if cur == self.tail:
-            self.tail = prev
+        cur.next = cur.next.next
+        if cur.next is None:
+            self.tail = cur
+        self.size -= 1
 
     def remove(self, data):
-        if not self.head:
-            print("empty list")
-            return
+        """Remove the first node with the given data.
 
+        Args:
+            data: The data to remove.
+
+        Raises:
+            ValueError: If the list is empty or data is not found.
+        """
+        if not self.head:
+            raise ValueError("Empty list")
         if self.head.data == data:
             self.del_at_start()
             return
 
         prev = self.head
         cur = self.head.next
-
         while cur:
             if cur.data == data:
                 prev.next = cur.next
                 if cur == self.tail:
                     self.tail = prev
+                self.size -= 1
                 return
             prev = cur
             cur = cur.next
-
-        print("value not found")
+        raise ValueError("Data not found")
 
     def del_at_start(self):
+        """Delete the node at the beginning.
+
+        Raises:
+            ValueError: If the list is empty.
+        """
         if not self.head:
-            print("empty list")
-            return
+            raise ValueError("Empty list")
         if self.head == self.tail:
             self.head = self.tail = None
-            return
-        self.head = self.head.next
+        else:
+            self.head = self.head.next
+        self.size -= 1
 
     def del_at_end(self):
+        """Delete the node at the end.
+
+        Raises:
+            ValueError: If the list is empty.
+        """
         if not self.head:
-            print("empty list")
-            return
+            raise ValueError("Empty list")
         if self.head == self.tail:
             self.head = self.tail = None
-            return
-        cur = self.head
-        while cur.next != self.tail:
-            cur = cur.next
-        cur.next = None
-        self.tail = cur
+        else:
+            cur = self.head
+            while cur.next != self.tail:
+                cur = cur.next
+            cur.next = None
+            self.tail = cur
+        self.size -= 1
 
     def update(self, position, data):
+        """Update the data of the node at the specified 0-based position.
+
+        Args:
+            position: The 0-based index of the node to update.
+            data: The new data value.
+
+        Raises:
+            ValueError: If the list is empty or position is invalid.
+        """
+        if not self.head:
+            raise ValueError("Empty list")
+        if position < 0 or position >= self.size:
+            raise ValueError("Invalid position")
+
         cur = self.head
-        idx = 0
-        while cur and idx < position:
+        for _ in range(position):
             cur = cur.next
-            idx += 1
-        if not cur:
-            print("invalid position")
-            return
         cur.data = data
 
     def reverse(self):
+        """Reverse the linked list in place."""
+        if not self.head or self.head == self.tail:
+            return
         prev = None
         cur = self.head
         self.tail = self.head
@@ -135,14 +191,91 @@ class SingleLinkedList:
             cur = nxt
         self.head = prev
 
+    def show_val(self, position):
+        """Return the data at the specified 0-based position.
+
+        Args:
+            position: The 0-based index of the node.
+
+        Returns:
+            The data at the specified position.
+
+        Raises:
+            ValueError: If the list is empty or position is invalid.
+        """
+        if not self.head:
+            raise ValueError("Empty list")
+        if position < 0 or position >= self.size:
+            raise ValueError("Invalid position")
+
+        cur = self.head
+        for _ in range(position):
+            cur = cur.next
+        return cur.data
+
+    def show_len(self):
+        """Return the number of nodes in the list.
+
+        Returns:
+            The size of the list.
+        """
+        return self.size
+
+    def find(self, data):
+        """Return the 0-based position of the first node with the given data.
+
+        Args:
+            data: The data to find.
+
+        Returns:
+            The 0-based index of the data, or -1 if not found.
+
+        Raises:
+            ValueError: If the list is empty.
+        """
+        if not self.head:
+            raise ValueError("Empty list")
+
+        cur = self.head
+        idx = 0
+        while cur:
+            if cur.data == data:
+                return idx
+            cur = cur.next
+            idx += 1
+        return -1
+
+    def generate(self, n):
+        """Generate a list with values from 1 to n at positions 0 to n-1.
+
+        Args:
+            n: The number of nodes to generate.
+
+        Raises:
+            ValueError: If n is negative.
+        """
+        if n < 0:
+            raise ValueError("Invalid size")
+        for i in range(1, n + 1):
+            self.insert_at_position(i, i)
+
     def display(self):
+        """Return a string representation of the list.
+
+        Returns:
+            A string representing the list.
+        """
+        if not self.head:
+            return "Empty list"
+        result = []
         cur = self.head
         while cur:
-            print(cur.data, end=" -> ")
+            result.append(str(cur.data))
             cur = cur.next
-        print("None")
+        return " -> ".join(result) + " -> None"
 
     def __iter__(self):
+        """Yield the data of each node in the list."""
         cur = self.head
         while cur:
             yield cur.data
