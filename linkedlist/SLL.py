@@ -155,23 +155,22 @@ class SingleLinkedList:
         for i in range(1,data+1):
             self.append(i,i)
     
-    def del_at_end(self):
-        pos = self.head
-        if not self.head:
-            print("empty list")
-            return
-
-        if self.head == self.tail:
-            self.head = None
-            self.tail = None
-
-        while pos.next != self.tail:
-            pos = pos.next
-            temp = pos.next
-        if pos.next:
-            temp.next = None
-        self.tail = temp
+ def del_at_end(self):
+    if not self.head:   # empty list
+        print("empty list")
         return
+
+    if self.head == self.tail:   # only one node
+        self.head = None
+        self.tail = None
+        return
+
+    pos = self.head
+    while pos.next != self.tail:   # stop at second last node
+        pos = pos.next
+
+    pos.next = None
+    self.tail = pos
 
     def del_at_start(self):
         if not self.head:
@@ -224,3 +223,4 @@ class SingleLinkedList:
         while current:
             yield current.data
             current = current.next
+
